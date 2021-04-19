@@ -1,0 +1,54 @@
+version: "3.8"
+services:
+
+    # PHP service
+    app:
+        build: ${APP_IMAGE}
+        container_name: ${APP_CONTAINER}
+        working_dir: ${APP_DEFAULT_PATH}
+        volumes:
+            - ${PHP_INI_PATH}:${PHP_INI_DEFAULT_PATH}
+            - ${APP_PATH}:${APP_DEFAULT_PATH}
+            - ${IMAGE_STORAGE_PATH}:${IMAGE_STORAGE_DEFAULT_PATH}
+            - ${VIDEO_STORAGE_PATH}:${VIDEO_STORAGE_DEFAULT_PATH}
+            - ${DOCUMENTS_STORAGE_PATH}:${DOCUMENTS_STORAGE_DEFAULT_PATH}
+        env_file:
+            - ./.env
+        networks:
+            - app-network
+
+    # MySQL database service
+    db:
+        image: ${DB_IMAGE}
+        container_name: ${DB_CONTAINER}
+        ports:
+            - "${DB_PORT}:${DB_DEFAULT_PORT}"
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+        env_file:
+            - ./.env
+        networks:
+            - app-network
+
+    # Nginx service
+    nginx:
+        image: ${NGINX_IMAGE}
+        container_name: ${SERVER_CONTAINER}
+        ports:
+            - ${NGINX_PORT}:${NGINX_PORT_DEFAULT}
+        volumes:
+            - ${APP_PATH}:${APP_DEFAULT_PATH}
+            - ${NGINX_CONF_PATH}:${NGINX_CONF_DEFAULT_PATH}
+        env_file:
+            - ./.env
+        networks:
+            - app-network
+
+networks:
+    app-network:
+        driver: bridge
+
+
